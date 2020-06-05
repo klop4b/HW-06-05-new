@@ -8,8 +8,6 @@ ipython = "*"
 httpie = "*"
 
 [packages]
-djangopipenv = "*"
-install = "*"
 django = "*"
 
 [requires]
