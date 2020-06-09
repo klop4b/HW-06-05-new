@@ -22,7 +22,7 @@ def get_age(qs):
         return "\\t"
     elif qs.find('age') != -1:
         qs = parse_qs(qs)
-        return 'You were born in ' + str(datetime.now().year - int(qs["age"][0])) + ' year'
+        return int(qs["age"][0])
     else:
         return "\\t"
 
@@ -31,9 +31,10 @@ class MyHandler(SimpleHTTPRequestHandler):
         if self.path.startswith("/hello") and self.path.find('name') != -1 and self.path.find('age')  != -1:
             path, qs = self.path.split("?")
             print(qs)
+            age = str(datetime.now().year - get_age(qs))
             msg = f"""
                             Hello {get_name(qs)}!
-                            {get_age(qs)}
+                            You were born in {age} year
                             Your path: {path}
                         """
 
