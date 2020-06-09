@@ -9,6 +9,7 @@ httpie = "*"
 
 [packages]
 django = "*"
+multipledispatch = "*"
 
 [requires]
 python_version = "3.8"

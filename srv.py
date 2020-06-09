@@ -8,67 +8,60 @@ from datetime import datetime
 PORT = int(os.getenv("PORT", 8000))
 print(f"PORT = {PORT}")
 
+def get_name(qs):
+    if qs =="":
+        return "Anonymous"
+    elif qs.find('name') != -1:
+        qs = parse_qs(qs)
+        return qs["name"][0]
+    else:
+        return "Anonymous"
+
+def get_age(qs):
+    if qs == "":
+        return "\\t"
+    elif qs.find('age') != -1:
+        qs = parse_qs(qs)
+        return 'You were born in ' + str(datetime.now().year - int(qs["age"][0])) + ' year'
+    else:
+        return "\\t"
+
 class MyHandler(SimpleHTTPRequestHandler):
     def do_GET(self):
-        if self.path.startswith("/hello") and self.path.find('name') != -1 and self.path.find('age') != -1:
-            path, name, age = self.path.split("?")
-            name = parse_qs(name)
-            age = parse_qs(age)
-            name = name["name"][0]
-            age = age["age"][0]
-            year = datetime.now().year - int(age)
-            born = 'You were born in ' + str(year) + ' year'
-
+        if self.path.startswith("/hello") and self.path.find('name') != -1 and self.path.find('age')  != -1:
+            path, qs = self.path.split("?")
+            print(qs)
             msg = f"""
-                            Hello {name}!
-                            {born}
+                            Hello {get_name(qs)}!
+                            {get_age(qs)}
                             Your path: {path}
                         """
 
-            self.send_response(200)
-            self.send_header("Content-type", "text/plain")
-            self.send_header("Content-length", str(len(msg)))
-            self.end_headers()
-            self.wfile.write(msg.encode())
+
 
         elif self.path.startswith("/hello") and self.path.find('name') != -1 and self.path.find('age') == -1:
-            path, name = self.path.split("?")
-            name = parse_qs(name)
-            name = name["name"][0]
-
+            path, qs = self.path.split("?")
 
             msg = f"""
-                                        Hello {name}!
-                                        Your path: {path}
-                                    """
-
-            self.send_response(200)
-            self.send_header("Content-type", "text/plain")
-            self.send_header("Content-length", str(len(msg)))
-            self.end_headers()
-            self.wfile.write(msg.encode())
+                    Hello {get_name(qs)}!
+                    Your path: {path}
+                    """
 
         elif self.path.endswith("/hello") or self.path.endswith("/hello/"):
-            path = self.path.split("?")
-
-
 
             msg = f"""
-                                                   Hello Anonymous!
-                                                   Your path: {path}
-                                               """
-
-            self.send_response(200)
-            self.send_header("Content-type", "text/plain")
-            self.send_header("Content-length", str(len(msg)))
-            self.end_headers()
-            self.wfile.write(msg.encode())
-
+                    Hello Anonymous!
+                    Your path: {self.path}
+                    """
 
         else:
             return SimpleHTTPRequestHandler.do_GET(self)
 
-
+        self.send_response(200)
+        self.send_header("Content-type", "text/plain")
+        self.send_header("Content-length", str(len(msg)))
+        self.end_headers()
+        self.wfile.write(msg.encode())
 
 
 with socketserver.TCPServer(("", PORT), MyHandler) as httpd:
