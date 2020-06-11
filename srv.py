@@ -8,60 +8,66 @@ from datetime import datetime
 PORT = int(os.getenv("PORT", 8000))
 print(f"PORT = {PORT}")
 
+def create_page(raw_path):
+    path, qs = raw_path.split("?") if '?' in raw_path else [raw_path, ""]
+
+    paths = {
+        '/hello': say_hello,
+        '/goodbye': say_goodbye,
+        }
+
+    return paths[path](qs)
+
+def say_hello(qs):
+    print(qs)
+
+    qs = parse_qs(qs)
+    print("get_name: ")
+    print(qs)
+    return f"""
+                    Hello {get_name(qs)}!
+                    You were born in {get_year(qs)} year
+                    Your path: /hello
+                     """
+
+def say_goodbye(qs):
+    return say_bye(datetime.now().hour)
+
 def get_name(qs):
-    if qs =="":
-        return "Anonymous"
-    elif qs.find('name') != -1:
-        qs = parse_qs(qs)
+    if 'name' in qs:
+        print("get_name: ")
+        print(qs)
         return qs["name"][0]
     else:
         return "Anonymous"
 
-def get_age(qs):
-    if qs == "":
-        return "\\t"
-    elif qs.find('age') != -1:
-        qs = parse_qs(qs)
-        return int(qs["age"][0])
+def get_year(qs):
+    if 'age' in qs:
+        print("get age: ")
+        print(qs)
+        return str(datetime.now().year - int(qs['age'][0]))
     else:
-        return "\\t"
+        return 'the best'
+
+
+def say_bye(hour):
+    if hour in range(13):
+        return "Goodbye!"
+    else:
+        return "Goodnight!"
+
+#def empty_path():
+#    return SimpleHTTPRequestHandler.do_GET(MyHandler)
 
 class MyHandler(SimpleHTTPRequestHandler):
     def do_GET(self):
-        if self.path.startswith("/hello") and self.path.find('name') != -1 and self.path.find('age')  != -1:
-            path, qs = self.path.split("?")
-            print(qs)
-            age = str(datetime.now().year - get_age(qs))
-            msg = f"""
-                            Hello {get_name(qs)}!
-                            You were born in {age} year
-                            Your path: {path}
-                        """
-
-
-
-        elif self.path.startswith("/hello") and self.path.find('name') != -1 and self.path.find('age') == -1:
-            path, qs = self.path.split("?")
-
-            msg = f"""
-                    Hello {get_name(qs)}!
-                    Your path: {path}
-                    """
-
-        elif self.path.endswith("/hello") or self.path.endswith("/hello/"):
-
-            msg = f"""
-                    Hello Anonymous!
-                    Your path: {self.path}
-                    """
-
-        else:
-            return SimpleHTTPRequestHandler.do_GET(self)
+        msg = create_page(self.path)
 
         self.send_response(200)
         self.send_header("Content-type", "text/plain")
-        self.send_header("Content-length", str(len(msg)))
+        self.send_header("Content-length", len(msg))
         self.end_headers()
+
         self.wfile.write(msg.encode())
 
 
