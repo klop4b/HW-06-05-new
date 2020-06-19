@@ -30,9 +30,9 @@ class MyHandler(SimpleHTTPRequestHandler):
         name = self.get_name(args)
         year = self.get_year(args)
 
-        print("say_hello")
-        print(name)
-        print(args)
+        print("method name: say_hello")
+        print(f"value name: {name}")
+        print(f"value args: {args}")
 
         msg = f"Hello {name}!"
         if year:
@@ -63,8 +63,8 @@ class MyHandler(SimpleHTTPRequestHandler):
                 continue
             args[key] = values[0]
 
-        print(args)
-        print("args")
+        print(f"value: args/n {args}")
+        print("args type:")
         print(type(args))
         return args
 
@@ -73,9 +73,9 @@ class MyHandler(SimpleHTTPRequestHandler):
 
     def get_year(self, qs) -> int:
         if 'age' in qs:
-            print("get age: ")
-            print(type(qs))
-            print(qs['age'][0])
+            print("method name: get age")
+            print(f"value age: {qs['age'][0]}")
+
             return datetime.now().year - int(qs.get('age'))
         else:
             return 'the best'
